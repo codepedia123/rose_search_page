@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <script src="https://thunkable.github.io/webviewer-extension/thunkableWebviewerExtension.js" type="text/javascript"></script>
+  <title>Advanced Workshop Search System</title>
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #333333;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: inline-block;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+    .form-control {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      font-size: 14px;
+    }
+    .region-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .region-column {
+      flex: 1 1 200px;
+      border: 1px solid #e0e0e0;
+      border-radius: 5px;
+      padding: 10px;
+    }
+    .main-region-label {
+      font-weight: bold;
+      font-size: 1.1em;
+      margin-right: 5px;
+    }
+    .json-input {
+      width: 100%;
+      height: 150px;
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 5px;
+      border: 1px solid #dddddd;
+      margin-bottom: 15px;
+      font-family: 'Courier New', monospace;
+    }
+    .btn-search {
+      background-color: #37A1FC;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .btn-search:hover {
+      background-color: #2a8adf;
+    }
+    .results {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #333333;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Advanced Workshop Search System</h1>
+  
+  <!-- Search Form -->
+  <div class="form-group">
+    <label for="ageRange">Age Range (e.g. 6-12):</label>
+    <input type="text" id="ageRange" class="form-control" oninput="validateForm()" placeholder="e.g. 6-12" />
+  </div>
+
+  <div class="form-group">
+    <label for="gender">Gender:</label>
+    <input type="text" id="gender" class="form-control" oninput="validateForm()" placeholder="e.g. male or female" />
+  </div>
+
+  <div class="form-group">
+    <label for="sen">SEN (comma separated):</label>
+    <input type="text" id="sen" class="form-control" oninput="validateForm()" placeholder="e.g. autism, dyslexia" />
+  </div>
+
+  <div class="form-group">
+    <label for="feeRange">Fee Range (comma separated from predefined: 0-250, 250-500, ... , 5000/+):</label>
+    <input type="text" id="feeRange" class="form-control" oninput="validateForm()" placeholder="e.g. 0-250, 500-1000" />
+  </div>
+
+  <div class="form-group">
+    <label for="serviceType">Service Type (comma separated):</label>
+    <input type="text" id="serviceType" class="form-control" oninput="validateForm()" placeholder="e.g. music, art" />
+  </div>
+
+  <!-- Regions (Optional) -->
+  <div class="form-group">
+    <label>Select Region(s) (optional):</label>
+    <div class="region-group">
+      <!-- Example: North main region -->
+      <div class="region-column">
+        <label class="main-region-label">
+          <input type="checkbox" id="regionNorth" onchange="toggleMainRegion('North')" />
+          North
+        </label>
+        <br/>
+        <label>
+          <input type="checkbox" class="subRegion subNorth" value="North East" />
+          North East
+        </label>
+        <br/>
+        <label>
+          <input type="checkbox" class="subRegion subNorth" value="North West" />
+          North West
+        </label>
+      </div>
+
+      <!-- Example: South main region -->
+      <div class="region-column">
+        <label class="main-region-label">
+          <input type="checkbox" id="regionSouth" onchange="toggleMainRegion('South')" />
+          South
+        </label>
+        <br/>
+        <label>
+          <input type="checkbox" class="subRegion subSouth" value="South East" />
+          South East
+        </label>
+        <br/>
+        <label>
+          <input type="checkbox" class="subRegion subSouth" value="South West" />
+          South West
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden / or optional: user can still paste JSON if desired -->
+  <textarea id="searchJson" class="json-input" placeholder="Enter Search JSON here..."></textarea>
+  <textarea id="workshopsJson" class="json-input" placeholder="Enter All Workshops JSON here..."></textarea>
+
+  <!-- Search/Submit button -->
+  <button class="btn-search" id="submitButton" onclick="searchFromForm()" disabled>Search</button>
+
+  <div class="results" id="results">Results:</div>
+</div>
+
+<script>
+  let searchJsonFilled = false;
+  let workshopsJsonFilled = false;
+
+  // Listen for messages from Thunkable
+  ThunkableWebviewerExtension.receiveMessage(function(message) {
+    if (message === '!') {
+      fetchAllWorkshops();
+    } else {
+      const messageContent = message.slice(1);
+      if (message.startsWith('#')) {
+        document.getElementById('searchJson').value = messageContent;
+        searchJsonFilled = true;
+      } else if (message.startsWith('%')) {
+        document.getElementById('workshopsJson').value = messageContent;
+        workshopsJsonFilled = true;
+      }
+      if (searchJsonFilled && workshopsJsonFilled) {
+        performSearch();
+      }
+    }
+  });
+
+  // Fetch all workshops if needed
+  function fetchAllWorkshops() {
+    fetch('https://script.google.com/macros/s/AKfycbw3Z1BKbNbblCFDECVkUermF224nHar1QCoRWu_xSFWxudmA8iYxMZsn16Yfj2LO0g4VA/exec')
+      .then(response => response.json())
+      .then(data => {
+        const allWorkshopsJson = JSON.stringify(data.All_Workshop_JSON);
+        document.getElementById('workshopsJson').value = allWorkshopsJson;
+        workshopsJsonFilled = true;
+        if (searchJsonFilled) {
+          performSearch();
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching workshops:', error);
+      });
+  }
+
+  // Build search JSON from form and then perform search
+  function searchFromForm() {
+    buildSearchJson();   // Places JSON into #searchJson
+    performSearch();     // Uses #searchJson & #workshopsJson
+  }
+
+  // Gather form data and construct search JSON
+  function buildSearchJson() {
+    const ageRange = document.getElementById('ageRange').value.trim();
+    const gender = document.getElementById('gender').value.trim();
+    const sen = document.getElementById('sen').value.trim();
+    const feeRange = document.getElementById('feeRange').value.trim();
+    const serviceType = document.getElementById('serviceType').value.trim();
+
+    // Gather selected regions
+    const regionCheckboxes = document.querySelectorAll('.subRegion');
+    let selectedRegions = [];
+    regionCheckboxes.forEach(chk => {
+      if (chk.checked) {
+        selectedRegions.push(chk.value);
+      }
+    });
+    // Also include main region labels if checked
+    // (But typically you'd rely on sub-region check for actual filtering.)
+    const regionNorth = document.getElementById('regionNorth');
+    if (regionNorth.checked) {
+      selectedRegions.push('North');
+    }
+    const regionSouth = document.getElementById('regionSouth');
+    if (regionSouth.checked) {
+      selectedRegions.push('South');
+    }
+
+    // Build object
+    const searchObj = {
+      "age": ageRange || "",          // or null if you prefer
+      "gender": gender || "",
+      "sen": sen || "",
+      "feeRange": feeRange || "",
+      "serviceType": serviceType || "",
+      "region": selectedRegions.join(', ')
+    };
+
+    // Place into #searchJson
+    document.getElementById('searchJson').value = JSON.stringify(searchObj);
+    searchJsonFilled = true;
+  }
+
+  // Enable or disable the Search button based on mandatory fields
+  // Region is optional, so we do NOT require region selection
+  function validateForm() {
+    const ageRange = document.getElementById('ageRange').value.trim();
+    const gender = document.getElementById('gender').value.trim();
+    const sen = document.getElementById('sen').value.trim();
+    const feeRange = document.getElementById('feeRange').value.trim();
+    const serviceType = document.getElementById('serviceType').value.trim();
+
+    // Region is optional, so no check for region
+    const allFilled = (ageRange && gender && sen && feeRange && serviceType);
+
+    document.getElementById('submitButton').disabled = !allFilled;
+  }
+
+  // Toggle all sub-regions of a main region when that main region is clicked
+  function toggleMainRegion(regionName) {
+    let subClass = '';
+    if (regionName === 'North') {
+      subClass = 'subNorth';
+    } else if (regionName === 'South') {
+      subClass = 'subSouth';
+    }
+
+    const mainCheckbox = document.getElementById(`region${regionName}`);
+    const subCheckboxes = document.querySelectorAll(`.${subClass}`);
+    if (mainCheckbox.checked) {
+      subCheckboxes.forEach(chk => chk.checked = true);
+    } else {
+      subCheckboxes.forEach(chk => chk.checked = false);
+    }
+  }
+
+  // Perform Search using the JSON values
+  function performSearch() {
+    try {
+      const searchInput = JSON.parse(document.getElementById('searchJson').value);
+      let allWorkshops = JSON.parse(document.getElementById('workshopsJson').value);
+
+      const matchingIDs = searchWorkshops(searchInput, allWorkshops);
+
+      if (matchingIDs.length > 0) {
+        const resultCsv = matchingIDs.join(', ');
+        document.getElementById('results').innerText = "Results: " + resultCsv;
+        ThunkableWebviewerExtension.postMessage(resultCsv);
+      } else {
+        document.getElementById('results').innerText = "Results: 0";
+        ThunkableWebviewerExtension.postMessage("0");
+      }
+    } catch (e) {
+      console.error('Error in performSearch:', e);
+      document.getElementById('results').innerText = "Results: 0";
+      ThunkableWebviewerExtension.postMessage("0");
+    }
+  }
+
+  function searchWorkshops(searchInput, allWorkshops) {
+    const matchingIDs = [];
+    allWorkshops.forEach((workshop) => {
+      if (checkAgeRange(workshop.Age, searchInput.age) &&
+          checkGender(workshop.Gender, searchInput.gender) &&
+          checkSen(workshop.SEN, searchInput.sen) &&
+          checkFee(workshop.Price, searchInput.feeRange) &&
+          checkService(workshop.Type, searchInput.serviceType) &&
+          checkRegion(workshop.Region, searchInput.region)) {
+        matchingIDs.push(workshop.ID);
+      }
+    });
+    return matchingIDs;
+  }
+
+  function checkAgeRange(workshopAgeRange, searchAgeRange) {
+    if (!searchAgeRange) return true;
+    const [searchMinAge, searchMaxAge] = searchAgeRange.split('-').map(Number);
+    const [workshopMinAge, workshopMaxAge] = workshopAgeRange.split('-').map(Number);
+    return !(searchMaxAge < workshopMinAge || searchMinAge > workshopMaxAge);
+  }
+
+  function checkGender(workshopGender, searchGender) {
+    if (!searchGender) return true;
+    return workshopGender.toLowerCase() === searchGender.toLowerCase();
+  }
+
+  function checkSen(workshopSen, searchSen) {
+    if (!searchSen) return true;
+    const searchSens = searchSen.toLowerCase().split(',').map(s => s.trim());
+    const workshopSens = workshopSen.toLowerCase().split(',').map(s => s.trim());
+    return searchSens.some(s => workshopSens.includes(s));
+  }
+
+  function checkFee(workshopPrice, searchFeeRange) {
+    if (!searchFeeRange) return true;
+
+    // Predefined price ranges
+    const predefinedRanges = [
+      "0-250",
+      "250-500",
+      "500-1000",
+      "1000-2000",
+      "2000-3000",
+      "3000-5000",
+      "5000/+"
+    ];
+
+    const feeRanges = searchFeeRange.split(',').map(range => range.trim());
+    return feeRanges.some(range => {
+      if (!predefinedRanges.includes(range)) return false; // Only valid if in the predefined list
+
+      if (range === "5000/+") {
+        return workshopPrice >= 5000; // Handle the "5000/+" special case
+      }
+      const [minFee, maxFee] = range.split('-').map(Number);
+      return workshopPrice >= minFee && workshopPrice <= maxFee;
+    });
+  }
+
+  function checkService(workshopType, searchServiceType) {
+    if (!searchServiceType) return true;
+    const searchServices = searchServiceType.toLowerCase().split(',').map(s => s.trim());
+    const workshopTypes = workshopType.toLowerCase().split(',').map(s => s.trim());
+    return searchServices.some(s => workshopTypes.includes(s));
+  }
+
+  function checkRegion(workshopRegion, searchRegion) {
+    if (!searchRegion) return true; // Region is optional
+    const searchRegions = searchRegion.toLowerCase().split(',').map(s => s.trim());
+    const workshopRegions = workshopRegion.toLowerCase().split(',').map(s => s.trim());
+    return searchRegions.some(region => workshopRegions.includes(region));
+  }
+</script>
+
+</body>
+</html>
