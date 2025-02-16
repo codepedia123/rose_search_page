@@ -1,394 +1,632 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <script src="https://thunkable.github.io/webviewer-extension/thunkableWebviewerExtension.js" type="text/javascript"></script>
-  <title>Advanced Workshop Search System</title>
-  <style>
-    body {
-      font-family: 'Montserrat', sans-serif;
-      background-color: #f5f5f5;
-      margin: 0;
-      padding: 20px;
-    }
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      background-color: #ffffff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    h1 {
-      text-align: center;
-      color: #333333;
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    .form-group label {
-      display: inline-block;
-      margin-bottom: 5px;
-      font-weight: 600;
-    }
-    .form-control {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 8px;
-      border-radius: 5px;
-      border: 1px solid #ddd;
-      font-size: 14px;
-    }
-    .region-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .region-column {
-      flex: 1 1 200px;
-      border: 1px solid #e0e0e0;
-      border-radius: 5px;
-      padding: 10px;
-    }
-    .main-region-label {
-      font-weight: bold;
-      font-size: 1.1em;
-      margin-right: 5px;
-    }
-    .json-input {
-      width: 100%;
-      height: 150px;
-      padding: 10px;
-      font-size: 14px;
-      border-radius: 5px;
-      border: 1px solid #dddddd;
-      margin-bottom: 15px;
-      font-family: 'Courier New', monospace;
-    }
-    .btn-search {
-      background-color: #37A1FC;
-      color: white;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-      display: block;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    .btn-search:hover {
-      background-color: #2a8adf;
-    }
-    .results {
-      margin-top: 20px;
-      font-size: 18px;
-      color: #333333;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Search Form</title>
+    <script src="https://thunkable.github.io/webviewer-extension/thunkableWebviewerExtension.js" type="text/javascript"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333333;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333333;
+        }
+
+        select,
+        button,
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 25px;
+            border: 1px solid #cccccc;
+            outline: none;
+            font-size: 14px;
+            font-family: 'Montserrat', sans-serif;
+            box-sizing: border-box;
+        }
+
+        /* Custom Colors for different dropdowns */
+        .age {
+            background-color: #A4DEC6;
+        }
+        .gender {
+            background-color: #96C2F7;
+        }
+        .sen {
+            background-color: #C7C2E5;
+        }
+        .fee-range {
+            background-color: #7A68EB;
+            color: #ffffff;
+        }
+        .service-type {
+            background-color: #FF9999;
+        }
+        .region {
+            background-color: #FFCC00;
+        }
+
+        .search-button {
+            background-color: #333333;
+            color: #ffffff;
+            cursor: pointer;
+            margin-top: 10px;
+            border-radius: 25px;
+            display: none; /* Initially hidden */
+        }
+
+        /* Generic dropdown container styling */
+        .dropdown {
+            position: relative;
+            width: 100%;
+            padding: 10px;
+            border-radius: 25px;
+            border: 1px solid #cccccc;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            box-sizing: border-box;
+        }
+
+        .dropdown::after {
+            content: '\25BC'; /* Down arrow */
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 12px;
+            color: #000;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            width: 100%;
+            background-color: #f1f1f1;
+            max-height: 200px;
+            overflow-y: auto;
+            border-radius: 25px;
+            z-index: 1;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        /* Larger/bolder main region checkbox style */
+        .main-region-label {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+        .main-region-label input {
+            transform: scale(1.2);
+            margin-right: 6px;
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-  <h1>Advanced Workshop Search System</h1>
-  
-  <!-- Search Form -->
-  <div class="form-group">
-    <label for="ageRange">Age Range (e.g. 6-12):</label>
-    <input type="text" id="ageRange" class="form-control" oninput="validateForm()" placeholder="e.g. 6-12" />
-  </div>
+    <h1 id="page-title">Find the perfect activity for your child</h1>
 
-  <div class="form-group">
-    <label for="gender">Gender:</label>
-    <input type="text" id="gender" class="form-control" oninput="validateForm()" placeholder="e.g. male or female" />
-  </div>
-
-  <div class="form-group">
-    <label for="sen">SEN (comma separated):</label>
-    <input type="text" id="sen" class="form-control" oninput="validateForm()" placeholder="e.g. autism, dyslexia" />
-  </div>
-
-  <div class="form-group">
-    <label for="feeRange">Fee Range (comma separated from predefined: 0-250, 250-500, ... , 5000/+):</label>
-    <input type="text" id="feeRange" class="form-control" oninput="validateForm()" placeholder="e.g. 0-250, 500-1000" />
-  </div>
-
-  <div class="form-group">
-    <label for="serviceType">Service Type (comma separated):</label>
-    <input type="text" id="serviceType" class="form-control" oninput="validateForm()" placeholder="e.g. music, art" />
-  </div>
-
-  <!-- Regions (Optional) -->
-  <div class="form-group">
-    <label>Select Region(s) (optional):</label>
-    <div class="region-group">
-      <!-- Example: North main region -->
-      <div class="region-column">
-        <label class="main-region-label">
-          <input type="checkbox" id="regionNorth" onchange="toggleMainRegion('North')" />
-          North
-        </label>
-        <br/>
-        <label>
-          <input type="checkbox" class="subRegion subNorth" value="North East" />
-          North East
-        </label>
-        <br/>
-        <label>
-          <input type="checkbox" class="subRegion subNorth" value="North West" />
-          North West
-        </label>
-      </div>
-
-      <!-- Example: South main region -->
-      <div class="region-column">
-        <label class="main-region-label">
-          <input type="checkbox" id="regionSouth" onchange="toggleMainRegion('South')" />
-          South
-        </label>
-        <br/>
-        <label>
-          <input type="checkbox" class="subRegion subSouth" value="South East" />
-          South East
-        </label>
-        <br/>
-        <label>
-          <input type="checkbox" class="subRegion subSouth" value="South West" />
-          South West
-        </label>
-      </div>
+    <!-- Age Field (Multiple Choice) -->
+    <div class="form-group">
+        <label for="age" id="label-age">Age</label>
+        <div class="dropdown age" id="age-dropdown-wrapper" onclick="toggleDropdown('age-dropdown')">
+            <span id="age-placeholder" class="age-placeholder">Select Age</span>
+            <div class="dropdown-content" id="age-dropdown">
+                <label><input type="checkbox" value="0-3" onclick="updateSelection('age-placeholder', 'age-dropdown')"> 0-3</label>
+                <label><input type="checkbox" value="4-7" onclick="updateSelection('age-placeholder', 'age-dropdown')"> 4-7</label>
+                <label><input type="checkbox" value="8-11" onclick="updateSelection('age-placeholder', 'age-dropdown')"> 8-11</label>
+                <label><input type="checkbox" value="12-15" onclick="updateSelection('age-placeholder', 'age-dropdown')"> 12-15</label>
+                <label><input type="checkbox" value="16-18" onclick="updateSelection('age-placeholder', 'age-dropdown')"> 16-18</label>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- Hidden / or optional: user can still paste JSON if desired -->
-  <textarea id="searchJson" class="json-input" placeholder="Enter Search JSON here..."></textarea>
-  <textarea id="workshopsJson" class="json-input" placeholder="Enter All Workshops JSON here..."></textarea>
+    <!-- Gender Field (Single Choice) -->
+    <div class="form-group">
+        <label for="gender" id="label-gender">Gender</label>
+        <select id="gender" class="gender" onchange="checkFieldsFilled()">
+            <option value="">Select Gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+        </select>
+    </div>
 
-  <!-- Search/Submit button -->
-  <button class="btn-search" id="submitButton" onclick="searchFromForm()" disabled>Search</button>
+    <!-- SEN Field (Multiple Choice) -->
+    <div class="form-group">
+        <label for="sen" id="label-sen">SEN</label>
+        <div class="dropdown sen" id="sen-dropdown-wrapper" onclick="toggleDropdown('sen-dropdown')">
+            <span id="sen-placeholder" class="sen-placeholder">Select SEN</span>
+            <div class="dropdown-content" id="sen-dropdown">
+                <label><input type="checkbox" value="ASD" onclick="updateSelection('sen-placeholder', 'sen-dropdown')"> ASD</label>
+                <label><input type="checkbox" value="ADHD" onclick="updateSelection('sen-placeholder', 'sen-dropdown')"> ADHD</label>
+                <label><input type="checkbox" value="Dyslexia" onclick="updateSelection('sen-placeholder', 'sen-dropdown')"> Dyslexia</label>
+                <label><input type="checkbox" value="Intellectual Disabilities" onclick="updateSelection('sen-placeholder', 'sen-dropdown')"> Intellectual Disabilities</label>
+                <label><input type="checkbox" value="Speech and Language Disorder" onclick="updateSelection('sen-placeholder', 'sen-dropdown')"> Speech and Language Disorder</label>
+                <label><input type="checkbox" value="Sensory Integration Disorder" onclick="updateSelection('sen-placeholder', 'sen-dropdown')"> Sensory Integration Disorder</label>
+                <label><input type="checkbox" value="Physical Disorders" onclick="updateSelection('sen-placeholder', 'sen-dropdown')"> Physical Disorders</label>
+                <label><input type="checkbox" value="Mood Disorders" onclick="updateSelection('sen-placeholder', 'sen-dropdown')"> Mood Disorders</label>
+            </div>
+        </div>
+    </div>
 
-  <div class="results" id="results">Results:</div>
-</div>
+    <!-- Fee Range Field (Multiple Choice) -->
+    <div class="form-group">
+        <label for="fee-range" id="label-fee-range">Fee Range</label>
+        <div class="dropdown fee-range" id="fee-range-dropdown-wrapper" onclick="toggleDropdown('fee-range-dropdown')">
+            <span id="fee-range-placeholder" class="fee-range-placeholder">Select Fee Range</span>
+            <div class="dropdown-content" id="fee-range-dropdown">
+                <label><input type="checkbox" value="0-250" onclick="updateSelection('fee-range-placeholder', 'fee-range-dropdown')"> 0-250</label>
+                <label><input type="checkbox" value="250-500" onclick="updateSelection('fee-range-placeholder', 'fee-range-dropdown')"> 250-500</label>
+                <label><input type="checkbox" value="500-1000" onclick="updateSelection('fee-range-placeholder', 'fee-range-dropdown')"> 500-1000</label>
+                <label><input type="checkbox" value="1000-2000" onclick="updateSelection('fee-range-placeholder', 'fee-range-dropdown')"> 1000-2000</label>
+                <label><input type="checkbox" value="2000-3000" onclick="updateSelection('fee-range-placeholder', 'fee-range-dropdown')"> 2000-3000</label>
+                <label><input type="checkbox" value="3000-5000" onclick="updateSelection('fee-range-placeholder', 'fee-range-dropdown')"> 3000-5000</label>
+                <label><input type="checkbox" value="5000/+" onclick="updateSelection('fee-range-placeholder', 'fee-range-dropdown')"> 5000+</label>
+            </div>
+        </div>
+    </div>
 
-<script>
-  let searchJsonFilled = false;
-  let workshopsJsonFilled = false;
+    <!-- Service Type Field (Multiple Choice) -->
+    <div class="form-group">
+        <label for="service-type" id="label-service-type">Type of Service</label>
+        <div class="dropdown service-type" id="service-type-dropdown-wrapper" onclick="toggleDropdown('service-type-dropdown')">
+            <span id="service-type-placeholder" class="service-type-placeholder">Select Service Type</span>
+            <div class="dropdown-content" id="service-type-dropdown">
+                <label><input type="checkbox" value="Assessment" onclick="updateSelection('service-type-placeholder', 'service-type-dropdown')"> Assessment</label>
+                <label><input type="checkbox" value="Activities" onclick="updateSelection('service-type-placeholder', 'service-type-dropdown')"> Activities</label>
+                <label><input type="checkbox" value="Training" onclick="updateSelection('service-type-placeholder', 'service-type-dropdown')"> Training</label>
+                <label><input type="checkbox" value="Talks" onclick="updateSelection('service-type-placeholder', 'service-type-dropdown')"> Talks</label>
+            </div>
+        </div>
+    </div>
 
-  // Listen for messages from Thunkable
-  ThunkableWebviewerExtension.receiveMessage(function(message) {
-    if (message === '!') {
-      fetchAllWorkshops();
-    } else {
-      const messageContent = message.slice(1);
-      if (message.startsWith('#')) {
-        document.getElementById('searchJson').value = messageContent;
-        searchJsonFilled = true;
-      } else if (message.startsWith('%')) {
-        document.getElementById('workshopsJson').value = messageContent;
-        workshopsJsonFilled = true;
-      }
-      if (searchJsonFilled && workshopsJsonFilled) {
-        performSearch();
-      }
-    }
-  });
+    <!-- Region Field (Multiple Choice, Optional) -->
+    <div class="form-group">
+        <label for="region" id="label-region">Region (Optional)</label>
+        <div class="dropdown region" id="region-dropdown-wrapper" onclick="toggleDropdown('region-dropdown')">
+            <span id="region-placeholder" class="region-placeholder">Select Region</span>
+            <div class="dropdown-content" id="region-dropdown">
+                <!-- Will be populated via JavaScript (including main region checkboxes) -->
+            </div>
+        </div>
+    </div>
 
-  // Fetch all workshops if needed
-  function fetchAllWorkshops() {
-    fetch('https://script.google.com/macros/s/AKfycbw3Z1BKbNbblCFDECVkUermF224nHar1QCoRWu_xSFWxudmA8iYxMZsn16Yfj2LO0g4VA/exec')
-      .then(response => response.json())
-      .then(data => {
-        const allWorkshopsJson = JSON.stringify(data.All_Workshop_JSON);
-        document.getElementById('workshopsJson').value = allWorkshopsJson;
-        workshopsJsonFilled = true;
-        if (searchJsonFilled) {
-          performSearch();
+    <button class="search-button" onclick="displayJSON()" id="search-button">Search</button>
+
+    <script>
+        // -- GLOBAL region group data structure for the default English version --
+        //   (We will override with translations if the language changes)
+        let regionGroupsData = {
+            "New Territories": {
+                "allLabel": "All New Territories",
+                "subRegions": ["Island","Kwai Tsing","North","Sai Kung","Sha Tin","Tai Po","Tsuen Wan","Tuen Mun","Yuen Long"]
+            },
+            "Kowloon": {
+                "allLabel": "All Kowloon",
+                "subRegions": ["Sham Shui Po","Kowloon City","Kwun Tong","Wong Tai Sin","Yau Tsim Mong"]
+            },
+            "Hong Kong Island": {
+                "allLabel": "All Hong Kong Island",
+                "subRegions": ["Central and Western","Eastern","Southern","Wan Chai"]
+            }
+        };
+
+        // Toggle dropdown display
+        function toggleDropdown(dropdownId) {
+            const dropdownContent = document.getElementById(dropdownId);
+            if (dropdownContent) {
+                // Hide all other dropdowns first
+                document.querySelectorAll('.dropdown-content').forEach(content => {
+                    if (content !== dropdownContent) content.style.display = 'none';
+                });
+                // Toggle the clicked dropdown
+                dropdownContent.style.display = (dropdownContent.style.display === "block") ? "none" : "block";
+            }
         }
-      })
-      .catch(error => {
-        console.error('Error fetching workshops:', error);
-      });
-  }
 
-  // Build search JSON from form and then perform search
-  function searchFromForm() {
-    buildSearchJson();   // Places JSON into #searchJson
-    performSearch();     // Uses #searchJson & #workshopsJson
-  }
+        // Check if all required fields have some selection (Region is optional)
+        function checkFieldsFilled() {
+            const age = document.getElementById('age-placeholder')?.innerText;
+            const gender = document.getElementById('gender')?.value;
+            const sen = document.getElementById('sen-placeholder')?.innerText;
+            const feeRange = document.getElementById('fee-range-placeholder')?.innerText;
+            const serviceType = document.getElementById('service-type-placeholder')?.innerText;
 
-  // Gather form data and construct search JSON
-  function buildSearchJson() {
-    const ageRange = document.getElementById('ageRange').value.trim();
-    const gender = document.getElementById('gender').value.trim();
-    const sen = document.getElementById('sen').value.trim();
-    const feeRange = document.getElementById('feeRange').value.trim();
-    const serviceType = document.getElementById('serviceType').value.trim();
+            // We'll consider a field empty if it starts with "Select"
+            const allRequiredFilled = (
+                age && !age.startsWith("Select") &&
+                gender && gender !== "" &&
+                sen && !sen.startsWith("Select") &&
+                feeRange && !feeRange.startsWith("Select") &&
+                serviceType && !serviceType.startsWith("Select")
+            );
 
-    // Gather selected regions
-    const regionCheckboxes = document.querySelectorAll('.subRegion');
-    let selectedRegions = [];
-    regionCheckboxes.forEach(chk => {
-      if (chk.checked) {
-        selectedRegions.push(chk.value);
-      }
-    });
-    // Also include main region labels if checked
-    // (But typically you'd rely on sub-region check for actual filtering.)
-    const regionNorth = document.getElementById('regionNorth');
-    if (regionNorth.checked) {
-      selectedRegions.push('North');
-    }
-    const regionSouth = document.getElementById('regionSouth');
-    if (regionSouth.checked) {
-      selectedRegions.push('South');
-    }
+            document.getElementById('search-button').style.display = allRequiredFilled ? 'block' : 'none';
+        }
 
-    // Build object
-    const searchObj = {
-      "age": ageRange || "",          // or null if you prefer
-      "gender": gender || "",
-      "sen": sen || "",
-      "feeRange": feeRange || "",
-      "serviceType": serviceType || "",
-      "region": selectedRegions.join(', ')
-    };
+        // Update placeholder text based on selected checkboxes
+        function updateSelection(placeholderId, dropdownId) {
+            const checkboxes = document.querySelectorAll(`#${dropdownId} input[type="checkbox"]`);
+            const selectedValues = Array.from(checkboxes)
+                .filter(checkbox => checkbox.checked && !checkbox.classList.contains('main-region-checkbox'))
+                .map(checkbox => checkbox.value);
 
-    // Place into #searchJson
-    document.getElementById('searchJson').value = JSON.stringify(searchObj);
-    searchJsonFilled = true;
-  }
+            const placeholder = document.getElementById(placeholderId);
+            placeholder.innerText = selectedValues.length > 0
+                ? selectedValues.join(', ')
+                : placeholderId.replace('-placeholder', ''); // fallback text
 
-  // Enable or disable the Search button based on mandatory fields
-  // Region is optional, so we do NOT require region selection
-  function validateForm() {
-    const ageRange = document.getElementById('ageRange').value.trim();
-    const gender = document.getElementById('gender').value.trim();
-    const sen = document.getElementById('sen').value.trim();
-    const feeRange = document.getElementById('feeRange').value.trim();
-    const serviceType = document.getElementById('serviceType').value.trim();
+            checkMainRegionStatus(dropdownId);
+            checkFieldsFilled();
+        }
 
-    // Region is optional, so no check for region
-    const allFilled = (ageRange && gender && sen && feeRange && serviceType);
+        // When a main region is toggled, select/unselect all subregions
+        function toggleAllSubRegions(mainCheckbox, groupName, dropdownId) {
+            const groupData = regionGroupsData[groupName];
+            if (!groupData) return;
 
-    document.getElementById('submitButton').disabled = !allFilled;
-  }
+            const subRegions = groupData.subRegions;
+            const dropdown = document.getElementById(dropdownId);
+            const allCheckboxes = dropdown.querySelectorAll("input[type='checkbox']");
 
-  // Toggle all sub-regions of a main region when that main region is clicked
-  function toggleMainRegion(regionName) {
-    let subClass = '';
-    if (regionName === 'North') {
-      subClass = 'subNorth';
-    } else if (regionName === 'South') {
-      subClass = 'subSouth';
-    }
+            // For the subregions of this group, set them to match main checkbox
+            subRegions.forEach(sr => {
+                allCheckboxes.forEach(chk => {
+                    if (chk.value === sr) {
+                        chk.checked = mainCheckbox.checked;
+                    }
+                });
+            });
 
-    const mainCheckbox = document.getElementById(`region${regionName}`);
-    const subCheckboxes = document.querySelectorAll(`.${subClass}`);
-    if (mainCheckbox.checked) {
-      subCheckboxes.forEach(chk => chk.checked = true);
-    } else {
-      subCheckboxes.forEach(chk => chk.checked = false);
-    }
-  }
+            // Update placeholder
+            const placeholderId = dropdownId.replace("-dropdown", "") + "-placeholder";
+            updateSelection(placeholderId, dropdownId);
+        }
 
-  // Perform Search using the JSON values
-  function performSearch() {
-    try {
-      const searchInput = JSON.parse(document.getElementById('searchJson').value);
-      let allWorkshops = JSON.parse(document.getElementById('workshopsJson').value);
+        // If a user manually checks/unchecks subregions,
+        // keep the main region checkbox in sync.
+        function checkMainRegionStatus(dropdownId) {
+            // For each main region checkbox, check if all of its sub-regions are selected
+            const dropdown = document.getElementById(dropdownId);
+            const mainCheckboxes = dropdown.querySelectorAll(".main-region-checkbox");
 
-      const matchingIDs = searchWorkshops(searchInput, allWorkshops);
+            mainCheckboxes.forEach(mainCheckbox => {
+                const groupName = mainCheckbox.getAttribute("data-group");
+                const subRegions = regionGroupsData[groupName]?.subRegions || [];
+                const allSubChecked = subRegions.every(sub => {
+                    let subChk = dropdown.querySelector(`input[type="checkbox"][value="${sub}"]`);
+                    return subChk && subChk.checked;
+                });
+                // If all sub-regions in this group are checked, check the main region
+                // Otherwise, uncheck it
+                mainCheckbox.checked = allSubChecked;
+            });
+        }
 
-      if (matchingIDs.length > 0) {
-        const resultCsv = matchingIDs.join(', ');
-        document.getElementById('results').innerText = "Results: " + resultCsv;
-        ThunkableWebviewerExtension.postMessage(resultCsv);
-      } else {
-        document.getElementById('results').innerText = "Results: 0";
-        ThunkableWebviewerExtension.postMessage("0");
-      }
-    } catch (e) {
-      console.error('Error in performSearch:', e);
-      document.getElementById('results').innerText = "Results: 0";
-      ThunkableWebviewerExtension.postMessage("0");
-    }
-  }
+        // --- Translation Data and Functions ---
+        const translations = {
+            "en": {
+                "title": "Find the perfect activity for your child",
+                "label_age": "Age",
+                "label_gender": "Gender",
+                "label_sen": "SEN",
+                "label_fee_range": "Fee Range",
+                "label_service_type": "Type of Service",
+                "label_region": "Region (Optional)",
+                "select_age": "Select Age",
+                "select_gender": "Select Gender",
+                "select_sen": "Select SEN",
+                "select_fee_range": "Select Fee Range",
+                "select_service_type": "Select Service Type",
+                "select_region": "Select Region",
+                "age_options": ["0-3", "4-7", "8-11", "12-15", "16-18"],
+                "gender_options": ["Male", "Female"],
+                "sen_options": ["ASD", "ADHD", "Dyslexia", "Intellectual Disabilities", "Speech and Language Disorder", "Sensory Integration Disorder", "Physical Disorders", "Mood Disorders"],
+                "fee_range_options": ["0-250", "250-500", "500-1000", "1000-2000", "2000-3000","3000-5000","5000+"],
+                "service_type_options": ["Assessment", "Activities", "Training", "Talks"],
+                // The region_options is now a structured object with main region info
+                "region_options": {
+                    "New Territories": {
+                        "allLabel": "All New Territories",
+                        "subRegions": ["Island","Kwai Tsing","North","Sai Kung","Sha Tin","Tai Po","Tsuen Wan","Tuen Mun","Yuen Long"]
+                    },
+                    "Kowloon": {
+                        "allLabel": "All Kowloon",
+                        "subRegions": ["Sham Shui Po","Kowloon City","Kwun Tong","Wong Tai Sin","Yau Tsim Mong"]
+                    },
+                    "Hong Kong Island": {
+                        "allLabel": "All Hong Kong Island",
+                        "subRegions": ["Central and Western","Eastern","Southern","Wan Chai"]
+                    }
+                }
+            },
+            "zh": {
+                "title": "为您的孩子找到完美的活动",
+                "label_age": "年龄",
+                "label_gender": "性别",
+                "label_sen": "特殊教育需要",
+                "label_fee_range": "费用范围",
+                "label_service_type": "服务类型",
+                "label_region": "地区（可选）",
+                "select_age": "选择年龄",
+                "select_gender": "选择性别",
+                "select_sen": "选择特殊教育需要",
+                "select_fee_range": "选择费用范围",
+                "select_service_type": "选择服务类型",
+                "select_region": "选择地区",
+                "age_options": ["0-3", "4-7", "8-11", "12-15", "16-18"],
+                "gender_options": ["男", "女"],
+                "sen_options": ["自闭症谱系障碍", "多动症", "阅读障碍", "智力障碍", "言语和语言障碍", "感觉统合障碍", "身体障碍", "情绪障碍"],
+                "fee_range_options": ["0-250", "250-500", "500-1000", "1000-2000", "2000-3000","3000-5000","5000+"],
+                "service_type_options": ["评估", "活动", "培训", "讲座"],
+                "region_options": {
+                    "New Territories": {
+                        "allLabel": "所有新界地区",
+                        "subRegions": ["离岛","葵青","北区","西贡","沙田","大埔","荃湾","屯门","元朗"]
+                    },
+                    "Kowloon": {
+                        "allLabel": "所有九龙地区",
+                        "subRegions": ["深水埗","九龙城","观塘","黄大仙","油尖旺"]
+                    },
+                    "Hong Kong Island": {
+                        "allLabel": "所有香港岛地区",
+                        "subRegions": ["中西区","东区","南区","湾仔"]
+                    }
+                }
+            },
+            "zh-TW": {
+                "title": "為您的孩子找到完美的活動",
+                "label_age": "年齡",
+                "label_gender": "性別",
+                "label_sen": "特殊教育需要",
+                "label_fee_range": "費用範圍",
+                "label_service_type": "服務類型",
+                "label_region": "地區（可選）",
+                "select_age": "選擇年齡",
+                "select_gender": "選擇性別",
+                "select_sen": "選擇特殊教育需要",
+                "select_fee_range": "選擇費用範圍",
+                "select_service_type": "選擇服務類型",
+                "select_region": "選擇地區",
+                "age_options": ["0-3", "4-7", "8-11", "12-15", "16-18"],
+                "gender_options": ["男", "女"],
+                "sen_options": ["自閉症譜系障礙", "多動症", "閱讀障礙", "智力障礙", "言語和語言障礙", "感覺統合障礙", "身體障礙", "情緒障礙"],
+                "fee_range_options": ["0-250", "250-500", "500-1000", "1000-2000", "2000-3000","3000-5000","5000+"],
+                "service_type_options": ["評估", "活動", "培訓", "講座"],
+                "region_options": {
+                    "New Territories": {
+                        "allLabel": "所有新界地區",
+                        "subRegions": ["離島","葵青","北區","西貢","沙田","大埔","荃灣","屯門","元朗"]
+                    },
+                    "Kowloon": {
+                        "allLabel": "所有九龍地區",
+                        "subRegions": ["深水埗","九龍城","觀塘","黃大仙","油尖旺"]
+                    },
+                    "Hong Kong Island": {
+                        "allLabel": "所有香港島地區",
+                        "subRegions": ["中西區","東區","南區","灣仔"]
+                    }
+                }
+            }
+        };
 
-  function searchWorkshops(searchInput, allWorkshops) {
-    const matchingIDs = [];
-    allWorkshops.forEach((workshop) => {
-      if (checkAgeRange(workshop.Age, searchInput.age) &&
-          checkGender(workshop.Gender, searchInput.gender) &&
-          checkSen(workshop.SEN, searchInput.sen) &&
-          checkFee(workshop.Price, searchInput.feeRange) &&
-          checkService(workshop.Type, searchInput.serviceType) &&
-          checkRegion(workshop.Region, searchInput.region)) {
-        matchingIDs.push(workshop.ID);
-      }
-    });
-    return matchingIDs;
-  }
+        // Dynamically apply translations based on language
+        function applyTranslations(lang) {
+            const translation = translations[lang];
+            if (!translation) return;
 
-  function checkAgeRange(workshopAgeRange, searchAgeRange) {
-    if (!searchAgeRange) return true;
-    const [searchMinAge, searchMaxAge] = searchAgeRange.split('-').map(Number);
-    const [workshopMinAge, workshopMaxAge] = workshopAgeRange.split('-').map(Number);
-    return !(searchMaxAge < workshopMinAge || searchMinAge > workshopMaxAge);
-  }
+            // Update page title and labels
+            document.getElementById("page-title").innerText = translation.title;
+            document.getElementById("label-age").innerText = translation.label_age;
+            document.getElementById("label-gender").innerText = translation.label_gender;
+            document.getElementById("label-sen").innerText = translation.label_sen;
+            document.getElementById("label-fee-range").innerText = translation.label_fee_range;
+            document.getElementById("label-service-type").innerText = translation.label_service_type;
+            document.getElementById("label-region").innerText = translation.label_region;
 
-  function checkGender(workshopGender, searchGender) {
-    if (!searchGender) return true;
-    return workshopGender.toLowerCase() === searchGender.toLowerCase();
-  }
+            // Update placeholder text
+            document.getElementById("age-placeholder").innerText = translation.select_age;
+            document.getElementById("gender").options[0].innerText = translation.select_gender;
+            document.getElementById("sen-placeholder").innerText = translation.select_sen;
+            document.getElementById("fee-range-placeholder").innerText = translation.select_fee_range;
+            document.getElementById("service-type-placeholder").innerText = translation.select_service_type;
+            document.getElementById("region-placeholder").innerText = translation.select_region;
 
-  function checkSen(workshopSen, searchSen) {
-    if (!searchSen) return true;
-    const searchSens = searchSen.toLowerCase().split(',').map(s => s.trim());
-    const workshopSens = workshopSen.toLowerCase().split(',').map(s => s.trim());
-    return searchSens.some(s => workshopSens.includes(s));
-  }
+            // Update dropdown checkboxes
+            updateCheckboxOptions("age-dropdown", translation.age_options);
+            updateCheckboxOptions("sen-dropdown", translation.sen_options);
+            updateCheckboxOptions("fee-range-dropdown", translation.fee_range_options);
+            updateCheckboxOptions("service-type-dropdown", translation.service_type_options);
 
-  function checkFee(workshopPrice, searchFeeRange) {
-    if (!searchFeeRange) return true;
+            // Update region data structure and re-render region dropdown
+            regionGroupsData = translation.region_options;
+            renderRegionDropdown("region-dropdown", regionGroupsData);
 
-    // Predefined price ranges
-    const predefinedRanges = [
-      "0-250",
-      "250-500",
-      "500-1000",
-      "1000-2000",
-      "2000-3000",
-      "3000-5000",
-      "5000/+"
-    ];
+            // Re-check fields in case placeholders changed
+            checkFieldsFilled();
+        }
 
-    const feeRanges = searchFeeRange.split(',').map(range => range.trim());
-    return feeRanges.some(range => {
-      if (!predefinedRanges.includes(range)) return false; // Only valid if in the predefined list
+        // Rebuild region groups with main region checkboxes
+        function renderRegionDropdown(dropdownId, regionData) {
+            const regionDropdown = document.getElementById(dropdownId);
+            regionDropdown.innerHTML = '';
 
-      if (range === "5000/+") {
-        return workshopPrice >= 5000; // Handle the "5000/+" special case
-      }
-      const [minFee, maxFee] = range.split('-').map(Number);
-      return workshopPrice >= minFee && workshopPrice <= maxFee;
-    });
-  }
+            // For each main region group
+            for (let groupName in regionData) {
+                const groupInfo = regionData[groupName];
 
-  function checkService(workshopType, searchServiceType) {
-    if (!searchServiceType) return true;
-    const searchServices = searchServiceType.toLowerCase().split(',').map(s => s.trim());
-    const workshopTypes = workshopType.toLowerCase().split(',').map(s => s.trim());
-    return searchServices.some(s => workshopTypes.includes(s));
-  }
+                // Main region checkbox
+                const mainRegionLabel = document.createElement("label");
+                mainRegionLabel.className = "main-region-label";
+                const mainCheckbox = document.createElement("input");
+                mainCheckbox.type = "checkbox";
+                mainCheckbox.value = groupInfo.allLabel;
+                mainCheckbox.classList.add("main-region-checkbox");
+                mainCheckbox.setAttribute("data-group", groupName);
+                mainCheckbox.onclick = (e) => {
+                    e.stopPropagation(); // Avoid toggling dropdown
+                    toggleAllSubRegions(mainCheckbox, groupName, dropdownId);
+                };
+                mainRegionLabel.appendChild(mainCheckbox);
+                mainRegionLabel.append(" " + groupInfo.allLabel);
+                regionDropdown.appendChild(mainRegionLabel);
 
-  function checkRegion(workshopRegion, searchRegion) {
-    if (!searchRegion) return true; // Region is optional
-    const searchRegions = searchRegion.toLowerCase().split(',').map(s => s.trim());
-    const workshopRegions = workshopRegion.toLowerCase().split(',').map(s => s.trim());
-    return searchRegions.some(region => workshopRegions.includes(region));
-  }
-</script>
+                // Sub-region checkboxes
+                groupInfo.subRegions.forEach(sr => {
+                    const label = document.createElement("label");
+                    const checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.value = sr;
+                    checkbox.onclick = (e) => {
+                        e.stopPropagation();
+                        updateSelection('region-placeholder', dropdownId);
+                    };
+                    label.appendChild(checkbox);
+                    label.append(" " + sr);
+                    regionDropdown.appendChild(label);
+                });
+            }
+        }
 
+        // Populate checkbox labels dynamically in a given dropdown
+        // (ignores region dropdown since we rebuild that separately)
+        function updateCheckboxOptions(dropdownId, options) {
+            if (!options) return;
+            const dropdown = document.getElementById(dropdownId);
+            // All existing checkboxes that are NOT main-region checkboxes
+            const labels = dropdown.querySelectorAll("label");
+            const realCheckboxLabels = Array.from(labels).filter(lb => lb.querySelector("input[type='checkbox']"));
+
+            // We assume the same number of checkboxes as the 'options' array length
+            realCheckboxLabels.forEach((label, index) => {
+                const checkbox = label.querySelector("input[type='checkbox']");
+                if (!checkbox) return;
+                if (options[index] !== undefined) {
+                    checkbox.value = options[index];
+                    label.lastChild.nodeValue = " " + options[index];
+                }
+            });
+        }
+
+        // Populate form fields based on JSON data from Thunkable
+        function populateForm(data) {
+            // Age (checkbox-based)
+            setDropdownSelection("age-dropdown", data.age || "");
+
+            // Gender (single select)
+            document.getElementById("gender").value = data.gender || "";
+
+            // SEN
+            setDropdownSelection("sen-dropdown", data.sen || "");
+
+            // Fee Range
+            setDropdownSelection("fee-range-dropdown", data.feeRange || "");
+
+            // Service Type
+            setDropdownSelection("service-type-dropdown", data.serviceType || "");
+
+            // Region
+            setDropdownSelection("region-dropdown", data.region || "");
+        }
+
+        // Set multiple-choice selections (for CSV values) in checkbox dropdown
+        function setDropdownSelection(dropdownId, csvValues) {
+            const values = csvValues.split(",");
+            const checkboxes = document.querySelectorAll(`#${dropdownId} input[type="checkbox"]`);
+            checkboxes.forEach(checkbox => {
+                // If value is in the CSV, check the box
+                checkbox.checked = values.includes(checkbox.value);
+            });
+            // Sync up main region checks
+            checkMainRegionStatus(dropdownId);
+            // After setting them, update the placeholder text
+            const placeholderId = `${dropdownId.replace("-dropdown", "")}-placeholder`;
+            updateSelection(placeholderId, dropdownId);
+        }
+
+        // Gather all input data into JSON
+        function gatherFormData() {
+            return {
+                // For checkbox-based fields, retrieve them as comma-separated lists
+                age: getSelectedValues("age-dropdown"),
+                gender: document.getElementById("gender").value,
+                sen: getSelectedValues("sen-dropdown"),
+                feeRange: getSelectedValues("fee-range-dropdown"),
+                serviceType: getSelectedValues("service-type-dropdown"),
+                region: getSelectedValues("region-dropdown") // optional
+            };
+        }
+
+        // Helper to get comma-separated values for multiple-choice checkboxes
+        // Skips main region checkboxes to avoid messing up the data
+        function getSelectedValues(dropdownId) {
+            const checkboxes = document.querySelectorAll(`#${dropdownId} input[type="checkbox"]:not(.main-region-checkbox)`);
+            const selected = Array.from(checkboxes)
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => checkbox.value);
+            return selected.join(',');
+        }
+
+        // Thunkable Web Viewer message handling
+        ThunkableWebviewerExtension.receiveMessage(function(message) {
+            // If message starts with '*', it's a language code
+            if (message.startsWith('*')) {
+                const lang = message.substring(1); // e.g., "*en" => "en"
+                if (['en', 'zh', 'zh-TW'].includes(lang)) {
+                    applyTranslations(lang);
+                } else {
+                    console.warn("Unsupported language code received:", lang);
+                }
+            }
+            // If message starts with '#', the rest is JSON data
+            else if (message.startsWith('#')) {
+                try {
+                    const jsonData = JSON.parse(message.substring(1));
+                    populateForm(jsonData);
+                } catch (error) {
+                    console.error("Invalid JSON data received:", error);
+                }
+            }
+        });
+
+        // On Search button click, send the JSON data back to Thunkable
+        function displayJSON() {
+            const data = gatherFormData();
+            ThunkableWebviewerExtension.postMessage(JSON.stringify(data));
+        }
+
+        // Initialize region dropdown on page load (default is English)
+        document.addEventListener("DOMContentLoaded", () => {
+            renderRegionDropdown("region-dropdown", regionGroupsData);
+        });
+    </script>
+
+    <!-- Optional analytics script -->
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" 
+        integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" 
+        data-cf-beacon='{"rayId":"8f656639a9605469","serverTiming":{"name":{"cfExtPri":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2024.10.5","token":"ef0548ffc9904e66b75bcd9134981ca0"}' 
+        crossorigin="anonymous">
+    </script>
 </body>
 </html>
